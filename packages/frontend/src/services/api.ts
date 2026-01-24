@@ -29,6 +29,25 @@ export const api = {
     getGoogleAuthUrl(): string {
       return `${API_BASE}/auth/google`;
     },
+
+    async getDevStatus(): Promise<{ available: boolean }> {
+      try {
+        const response = await fetch(`${API_BASE}/auth/dev-status`, {
+          credentials: 'include',
+        });
+        return handleResponse<{ available: boolean }>(response);
+      } catch {
+        return { available: false };
+      }
+    },
+
+    async devLogin(): Promise<AuthResponse> {
+      const response = await fetch(`${API_BASE}/auth/dev-login`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      return handleResponse<AuthResponse>(response);
+    },
   },
 
   rooms: {

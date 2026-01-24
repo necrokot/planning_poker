@@ -2,8 +2,25 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 
-// Load .env from the monorepo root
-const envPath = path.join(process.cwd(), '.env');
+// Load .env from the monorepo root (two levels up from packages/backend/src)
+const findEnvPath = (): string => {
+  // Try current working directory first
+  let envPath = path.join(process.cwd(), '.env');
+  if (fs.existsSync(envPath)) return envPath;
+  
+  // Try monorepo root (when running from packages/backend)
+  envPath = path.join(process.cwd(), '..', '..', '.env');
+  if (fs.existsSync(envPath)) return envPath;
+  
+  // Try relative to this file (dist/config or src/config -> root)
+  envPath = path.join(__dirname, '..', '..', '..', '..', '.env');
+  if (fs.existsSync(envPath)) return envPath;
+  
+  // Fallback to cwd
+  return path.join(process.cwd(), '.env');
+};
+
+const envPath = findEnvPath();
 console.log('Loading .env from:', envPath);
 console.log('.env exists:', fs.existsSync(envPath));
 dotenv.config({ path: envPath });
@@ -37,4 +54,7 @@ export const config = {
   maxRoomsPerUser: parseInt(process.env.MAX_ROOMS_PER_USER || '3', 10),
   roomTtlSeconds: parseInt(process.env.ROOM_TTL_SECONDS || '86400', 10),
   sessionTtlSeconds: parseInt(process.env.SESSION_TTL_SECONDS || '604800', 10),
+
+  // Dev mode (for local development only)
+  isDev: (process.env.NODE_ENV || 'development') !== 'production',
 };

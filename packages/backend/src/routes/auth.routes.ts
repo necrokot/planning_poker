@@ -85,4 +85,42 @@ router.post('/logout', (_req, res) => {
   res.json({ message: 'Logged out successfully' });
 });
 
+// Dev auth status (for frontend to know if dev login is available)
+router.get('/dev-status', (_req, res) => {
+  res.json({ available: config.isDev });
+});
+
+// Dev login (localhost only, non-production only)
+router.post('/dev-login', async (req, res) => {
+  // Guard 1: Only available in development
+  if (!config.isDev) {
+    res.status(404).json({ message: 'Not found' });
+    return;
+  }
+
+  // Guard 2: Only allow localhost requests
+  const host = req.hostname || req.headers.host?.split(':')[0] || '';
+  const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
+  if (!isLocalhost) {
+    res.status(403).json({ message: 'Dev auth only available on localhost' });
+    return;
+  }
+
+  try {
+    const { user, token } = await authService.handleDevLogin();
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false, // Dev mode, no HTTPS
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.json({ user });
+  } catch (error) {
+    console.error('Dev login error:', error);
+    res.status(500).json({ message: 'Dev login failed' });
+  }
+});
+
 export const authRoutes = router;

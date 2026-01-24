@@ -1,10 +1,10 @@
 import { Navigate } from 'react-router-dom';
 import { GoogleLoginButton } from '../components/auth';
-import { Card } from '../components/common';
+import { Button, Card } from '../components/common';
 import { useAuth } from '../hooks';
 
 export function LoginPage() {
-  const { isAuthenticated, isLoading, loginWithGoogle } = useAuth();
+  const { isAuthenticated, isLoading, isDevMode, loginWithGoogle, loginWithDev } = useAuth();
 
   if (isLoading) {
     return null;
@@ -26,6 +26,26 @@ export function LoginPage() {
 
         <div className="space-y-4">
           <GoogleLoginButton onClick={loginWithGoogle} />
+
+          {isDevMode && (
+            <>
+              <div className="relative flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative bg-white px-4 text-sm text-gray-500">or</div>
+              </div>
+
+              <Button
+                onClick={loginWithDev}
+                variant="secondary"
+                className="flex items-center justify-center gap-2 w-full bg-amber-100 hover:bg-amber-200 border-amber-300"
+              >
+                <span className="text-amber-600">&#9888;</span>
+                <span>Skip Auth (Dev Only)</span>
+              </Button>
+            </>
+          )}
         </div>
 
         <div className="mt-8 pt-6 border-t border-gray-200">

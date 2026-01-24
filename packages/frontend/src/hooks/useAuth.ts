@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store';
 import { api } from '../services';
 
 export function useAuth() {
   const { user, isLoading, isAuthenticated, setUser, setLoading, logout } = useAuthStore();
+  const [isDevMode, setIsDevMode] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -15,7 +16,13 @@ export function useAuth() {
       }
     };
 
+    const checkDevMode = async () => {
+      const { available } = await api.auth.getDevStatus();
+      setIsDevMode(available);
+    };
+
     checkAuth();
+    checkDevMode();
   }, [setUser]);
 
   const handleLogout = async () => {
@@ -31,12 +38,25 @@ export function useAuth() {
     window.location.href = api.auth.getGoogleAuthUrl();
   };
 
+  const loginWithDev = async () => {
+    try {
+      setLoading(true);
+      const { user } = await api.auth.devLogin();
+      setUser(user);
+    } catch (error) {
+      console.error('Dev login failed:', error);
+      setLoading(false);
+    }
+  };
+
   return {
     user,
     isLoading,
     isAuthenticated,
+    isDevMode,
     logout: handleLogout,
     loginWithGoogle,
+    loginWithDev,
     setLoading,
   };
 }

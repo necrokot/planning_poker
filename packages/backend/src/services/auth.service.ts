@@ -42,4 +42,20 @@ export const authService = {
       avatarUrl: user.avatarUrl,
     };
   },
+
+  async handleDevLogin(): Promise<{ user: User; token: string }> {
+    const user = await userRepository.upsertByGoogleId({
+      googleId: 'DEV_LOCAL_USER',
+      email: 'dev@localhost.local',
+      name: 'Dev Admin',
+      avatarUrl: null,
+    });
+
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+    });
+
+    return { user, token };
+  },
 };
