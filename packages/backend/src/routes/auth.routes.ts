@@ -1,0 +1,88 @@
+import { Router, Request, Response } from 'express';
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { config } from '../config';
+import { authService, GoogleProfile } from '../services/auth.service';
+import { AuthenticatedRequest, authMiddleware } from '../middleware';
+
+const router = Router();
+
+// Configure Google OAuth strategy only if credentials are provided
+const hasGoogleCredentials = config.google.clientId && config.google.clientId !== 'your-google-client-id' && 
+                             config.google.clientSecret && config.google.clientSecret !== 'your-google-client-secret';
+
+if (hasGoogleCredentials) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: config.google.clientId,
+        clientSecret: config.google.clientSecret,
+        callbackURL: config.google.callbackUrl,
+      },
+      async (_accessToken, _refreshToken, profile, done) => {
+        try {
+          const { user, token } = await authService.handleGoogleCallback(profile as unknown as GoogleProfile);
+          done(null, { user, token });
+        } catch (error) {
+          done(error as Error);
+        }
+      }
+    )
+  );
+} else {
+  console.warn('⚠️  Google OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env file.');
+  console.warn('   Get credentials from: https://console.cloud.google.com/apis/credentials');
+}
+
+// Initiate Google OAuth
+router.get(
+  '/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    session: false,
+  })
+);
+
+// Google OAuth callback
+router.get(
+  '/callback',
+  passport.authenticate('google', {
+    session: false,
+    failureRedirect: `${config.frontendUrl}/login?error=auth_failed`,
+  }),
+  (req, res) => {
+    const { token } = req.user as { token: string };
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: config.nodeEnv === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.redirect(`${config.frontendUrl}/dashboard`);
+  }
+);
+
+// Get current user
+router.get('/me', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const user = await authService.getCurrentUser(authReq.user!.userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+    res.json({ user });
+  } catch {
+    res.status(500).json({ message: 'Failed to get user' });
+  }
+});
+
+// Logout
+router.post('/logout', (_req, res) => {
+  res.clearCookie('token');
+  res.json({ message: 'Logged out successfully' });
+});
+
+export const authRoutes = router;

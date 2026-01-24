@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+      target: development
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./packages/shared:/app/packages/shared
+      - ./packages/backend:/app/packages/backend
+      - /app/packages/backend/node_modules
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - FRONTEND_URL=http://localhost:3000
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=http://localhost:3001/api/auth/callback
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-in-production}
+      - JWT_EXPIRY=7d
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/planning_poker
+      - REDIS_URL=redis://redis:6379
+      - MAX_ROOMS_PER_USER=3
+      - ROOM_TTL_SECONDS=86400
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - planning-poker-net
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+      target: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./packages/shared:/app/packages/shared
+      - ./packages/frontend:/app/packages/frontend
+      - /app/packages/frontend/node_modules
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    networks:
+      - planning-poker-net
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=planning_poker
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - planning-poker-net
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - planning-poker-net
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - planning-poker-net
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  planning-poker-net:
+    driver: bridge

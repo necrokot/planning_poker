@@ -1,0 +1,23 @@
+{
+  "name": "planning-poker",
+  "version": "1.0.0",
+  "description": "Planning poker web application",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @planning-poker/backend\" \"npm run dev -w @planning-poker/frontend\"",
+    "build": "npm run build -w @planning-poker/shared && npm run build -w @planning-poker/backend && npm run build -w @planning-poker/frontend",
+    "lint": "npm run lint -w @planning-poker/shared && npm run lint -w @planning-poker/backend && npm run lint -w @planning-poker/frontend",
+    "typecheck": "npm run typecheck -w @planning-poker/shared && npm run typecheck -w @planning-poker/backend && npm run typecheck -w @planning-poker/frontend",
+    "test": "npm run test -w @planning-poker/backend && npm run test -w @planning-poker/frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
