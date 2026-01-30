@@ -48,6 +48,22 @@ export const api = {
       });
       return handleResponse<AuthResponse>(response);
     },
+
+    async dev1Login(): Promise<AuthResponse> {
+      const response = await fetch(`${API_BASE}/auth/dev1-login`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      return handleResponse<AuthResponse>(response);
+    },
+
+    async dev2Login(): Promise<AuthResponse> {
+      const response = await fetch(`${API_BASE}/auth/dev2-login`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      return handleResponse<AuthResponse>(response);
+    },
   },
 
   rooms: {

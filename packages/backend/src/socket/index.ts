@@ -14,17 +14,34 @@ interface AuthenticatedSocket extends Socket<ClientToServerEvents, ServerToClien
   currentRoom?: string;
 }
 
+function parseCookies(cookieHeader: string | undefined): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!cookieHeader) return cookies;
+  
+  cookieHeader.split(';').forEach(cookie => {
+    const [name, ...rest] = cookie.trim().split('=');
+    if (name && rest.length > 0) {
+      cookies[name] = rest.join('=');
+    }
+  });
+  
+  return cookies;
+}
+
 export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToClientEvents>): void {
   // Authentication middleware
   io.use((socket: AuthenticatedSocket, next) => {
-    const token = socket.handshake.auth.token || socket.handshake.headers.cookie?.split('token=')[1]?.split(';')[0];
+    const cookies = parseCookies(socket.handshake.headers.cookie);
+    const token = socket.handshake.auth.token || cookies.token;
 
     if (!token) {
+      console.log('Socket auth failed: No token found');
       return next(new Error('Authentication required'));
     }
 
     const decoded = verifyToken(token);
     if (!decoded) {
+      console.log('Socket auth failed: Invalid token');
       return next(new Error('Invalid token'));
     }
 
@@ -33,15 +50,18 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
   });
 
   io.on('connection', (socket: AuthenticatedSocket) => {
-    console.log(`User connected: ${socket.user?.userId}`);
+    console.log(`User connected: ${socket.user?.userId} (socket: ${socket.id})`);
 
     // Join room
     socket.on('join_room', async ({ roomId }) => {
+      console.log(`User ${socket.user?.userId} attempting to join room ${roomId}`);
       try {
         const room = await roomService.joinRoom(roomId, socket.user!.userId);
         
         socket.join(roomId);
         socket.currentRoom = roomId;
+
+        console.log(`User ${socket.user?.userId} joined room ${roomId}, participants: ${room.participants.length}`);
 
         // Send room state to the joining user
         socket.emit('room_state', room);
@@ -53,6 +73,7 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
         }
       } catch (error: unknown) {
         const err = error as { message?: string };
+        console.error(`User ${socket.user?.userId} failed to join room ${roomId}:`, err.message);
         socket.emit('error', err.message || 'Failed to join room');
       }
     });

@@ -4,7 +4,7 @@ import { Button, Card } from '../components/common';
 import { useAuth } from '../hooks';
 
 export function LoginPage() {
-  const { isAuthenticated, isLoading, isDevMode, loginWithGoogle, loginWithDev } = useAuth();
+  const { isAuthenticated, isLoading, isDevMode, loginWithGoogle, loginWithDev, loginWithDev1, loginWithDev2 } = useAuth();
 
   if (isLoading) {
     return null;
@@ -42,8 +42,25 @@ export function LoginPage() {
                 className="flex items-center justify-center gap-2 w-full bg-amber-100 hover:bg-amber-200 border-amber-300"
               >
                 <span className="text-amber-600">&#9888;</span>
-                <span>Skip Auth (Dev Only)</span>
+                <span>Dev Admin</span>
               </Button>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={loginWithDev1}
+                  variant="secondary"
+                  className="flex items-center justify-center gap-2 flex-1 bg-blue-100 hover:bg-blue-200 border-blue-300"
+                >
+                  <span>Dev Player 1</span>
+                </Button>
+                <Button
+                  onClick={loginWithDev2}
+                  variant="secondary"
+                  className="flex items-center justify-center gap-2 flex-1 bg-green-100 hover:bg-green-200 border-green-300"
+                >
+                  <span>Dev Player 2</span>
+                </Button>
+              </div>
             </>
           )}
         </div>

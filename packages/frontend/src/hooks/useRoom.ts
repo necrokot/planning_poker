@@ -25,12 +25,21 @@ export function useRoom(roomId: string) {
   const { user } = useAuthStore();
 
   useEffect(() => {
-    // Clear any previous error state when starting a new room connection
+    console.log('[useRoom] Effect running for room:', roomId);
+    
+    // Clear previous room state when entering a new room
+    setRoom(null);
     setError(null);
+    setVotingResults(null);
 
     const socket = socketService.connect();
+    
+    // Set connected state based on actual socket state
+    setConnected(socket.connected);
+    console.log('[useRoom] Socket connected state:', socket.connected);
 
     const handleConnect = () => {
+      console.log('[useRoom] Socket connected, joining room');
       setConnected(true);
       socketService.joinRoom(roomId);
     };
@@ -39,11 +48,13 @@ export function useRoom(roomId: string) {
       setError(err.message || 'Connection failed');
     };
 
-    const handleDisconnect = () => {
+    const handleDisconnect = (reason: string) => {
+      console.log('[useRoom] Socket disconnected, reason:', reason);
       setConnected(false);
     };
 
     const handleRoomState = (roomData: Room) => {
+      console.log('[useRoom] Received room_state:', roomData.id);
       setRoom(roomData);
     };
 
@@ -116,11 +127,13 @@ export function useRoom(roomId: string) {
 
     // If socket is already connected, join immediately (after listeners are set up)
     if (socket.connected) {
+      console.log('[useRoom] Socket already connected, joining room immediately');
       setConnected(true);
       socketService.joinRoom(roomId);
     }
 
     return () => {
+      console.log('[useRoom] Cleanup running for room:', roomId);
       // Remove all listeners to prevent stacking
       socket.off('connect', handleConnect);
       socket.off('connect_error', handleConnectError);
@@ -138,7 +151,7 @@ export function useRoom(roomId: string) {
       socket.off('error', handleError);
 
       socketService.leaveRoom(roomId);
-      socketService.disconnect();
+      // Don't disconnect - socket can be reused. It will be disconnected on logout.
       setRoom(null);
       setError(null);
     };

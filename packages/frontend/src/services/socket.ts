@@ -13,10 +13,21 @@ let socket: TypedSocket | null = null;
 
 export const socketService = {
   connect(): TypedSocket {
-    if (socket?.connected) {
+    // If socket exists and is connected or connecting, return it
+    if (socket && (socket.connected || socket.active)) {
+      console.log('[Socket] Reusing existing socket, connected:', socket.connected, 'active:', socket.active);
       return socket;
     }
 
+    // If socket exists but is fully disconnected, clean it up first
+    if (socket) {
+      console.log('[Socket] Cleaning up old disconnected socket');
+      socket.removeAllListeners();
+      socket.disconnect();
+      socket = null;
+    }
+
+    console.log('[Socket] Creating new socket');
     socket = io({
       withCredentials: true,
       autoConnect: true,
@@ -27,6 +38,8 @@ export const socketService = {
 
   disconnect(): void {
     if (socket) {
+      console.log('[Socket] Disconnecting socket');
+      socket.removeAllListeners();
       socket.disconnect();
       socket = null;
     }

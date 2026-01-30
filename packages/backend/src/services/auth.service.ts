@@ -58,4 +58,36 @@ export const authService = {
 
     return { user, token };
   },
+
+  async handleDev1Login(): Promise<{ user: User; token: string }> {
+    const user = await userRepository.upsertByGoogleId({
+      googleId: 'DEV_LOCAL_USER_1',
+      email: 'dev1@localhost.local',
+      name: 'Dev Player 1',
+      avatarUrl: null,
+    });
+
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+    });
+
+    return { user, token };
+  },
+
+  async handleDev2Login(): Promise<{ user: User; token: string }> {
+    const user = await userRepository.upsertByGoogleId({
+      googleId: 'DEV_LOCAL_USER_2',
+      email: 'dev2@localhost.local',
+      name: 'Dev Player 2',
+      avatarUrl: null,
+    });
+
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+    });
+
+    return { user, token };
+  },
 };

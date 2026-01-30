@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store';
-import { api } from '../services';
+import { api, socketService } from '../services';
 
 export function useAuth() {
   const { user, isLoading, isAuthenticated, setUser, setLoading, logout } = useAuthStore();
@@ -27,6 +27,7 @@ export function useAuth() {
 
   const handleLogout = async () => {
     try {
+      socketService.disconnect(); // Disconnect socket before logout
       await api.auth.logout();
       logout();
     } catch (error) {
@@ -49,6 +50,28 @@ export function useAuth() {
     }
   };
 
+  const loginWithDev1 = async () => {
+    try {
+      setLoading(true);
+      const { user } = await api.auth.dev1Login();
+      setUser(user);
+    } catch (error) {
+      console.error('Dev1 login failed:', error);
+      setLoading(false);
+    }
+  };
+
+  const loginWithDev2 = async () => {
+    try {
+      setLoading(true);
+      const { user } = await api.auth.dev2Login();
+      setUser(user);
+    } catch (error) {
+      console.error('Dev2 login failed:', error);
+      setLoading(false);
+    }
+  };
+
   return {
     user,
     isLoading,
@@ -57,6 +80,8 @@ export function useAuth() {
     logout: handleLogout,
     loginWithGoogle,
     loginWithDev,
+    loginWithDev1,
+    loginWithDev2,
     setLoading,
   };
 }
