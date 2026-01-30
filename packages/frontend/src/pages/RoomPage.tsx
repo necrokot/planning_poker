@@ -46,8 +46,24 @@ export function RoomPage() {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <Spinner size="lg" />
-          <p className="mt-4 text-gray-600">Connecting to room...</p>
+          {error ? (
+            <>
+              <div className="bg-red-100 text-red-700 px-6 py-4 rounded-lg mb-4">
+                {error}
+              </div>
+              <Link
+                to="/dashboard"
+                className="text-primary-600 hover:text-primary-700 font-medium"
+              >
+                &larr; Back to Dashboard
+              </Link>
+            </>
+          ) : (
+            <>
+              <Spinner size="lg" />
+              <p className="mt-4 text-gray-600">Connecting to room...</p>
+            </>
+          )}
         </div>
       </div>
     );

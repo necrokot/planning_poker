@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { useRoomStore, useAuthStore } from '../store';
 import { socketService } from '../services';
-import { FibonacciValue, Issue, Role } from '@planning-poker/shared';
+import { FibonacciValue, Issue, Role, Room, Participant, VotingResults } from '@planning-poker/shared';
 
 export function useRoom(roomId: string) {
   const {
@@ -25,71 +25,122 @@ export function useRoom(roomId: string) {
   const { user } = useAuthStore();
 
   useEffect(() => {
+    // Clear any previous error state when starting a new room connection
+    setError(null);
+
     const socket = socketService.connect();
 
-    socket.on('connect', () => {
+    const handleConnect = () => {
       setConnected(true);
       socketService.joinRoom(roomId);
-    });
+    };
 
-    socket.on('disconnect', () => {
+    const handleConnectError = (err: Error) => {
+      setError(err.message || 'Connection failed');
+    };
+
+    const handleDisconnect = () => {
       setConnected(false);
-    });
+    };
 
-    socket.on('room_state', (roomData) => {
+    const handleRoomState = (roomData: Room) => {
       setRoom(roomData);
-    });
+    };
 
-    socket.on('user_joined', (participant) => {
+    const handleUserJoined = (participant: Participant) => {
       updateParticipant(participant);
-    });
+    };
 
-    socket.on('user_left', (userId) => {
-      removeParticipant(userId);
-    });
+    const handleUserLeft = (leftUserId: string) => {
+      removeParticipant(leftUserId);
+    };
 
-    socket.on('vote_submitted', ({ userId }) => {
-      setVoteSubmitted(userId);
-    });
+    const handleVoteSubmitted = ({ userId: oderId }: { userId: string }) => {
+      setVoteSubmitted(oderId);
+    };
 
-    socket.on('votes_revealed', (results) => {
+    const handleVotesRevealed = (results: VotingResults) => {
       setVotingResults(results);
-    });
+    };
 
-    socket.on('voting_reset', () => {
+    const handleVotingReset = () => {
       resetVoting();
-    });
+    };
 
-    socket.on('issue_changed', (issue) => {
+    const handleIssueChanged = (issue: Issue | null) => {
       setCurrentIssue(issue);
-    });
+    };
 
-    socket.on('issue_added', (issue) => {
+    const handleIssueAdded = (issue: Issue) => {
       addIssue(issue);
-    });
+    };
 
-    socket.on('issue_removed', (issueId) => {
+    const handleIssueRemoved = (issueId: string) => {
       removeIssueFromStore(issueId);
-    });
+    };
 
-    socket.on('role_updated', ({ userId, role }) => {
-      if (room) {
-        const participant = room.participants.find((p) => p.userId === userId);
+    const handleRoleUpdated = ({ userId: oderId, role }: { userId: string; role: Role }) => {
+      const currentRoom = useRoomStore.getState().room;
+      if (currentRoom) {
+        const participant = currentRoom.participants.find((p) => p.userId === oderId);
         if (participant) {
           updateParticipant({ ...participant, role });
         }
       }
-    });
+    };
 
-    socket.on('error', (message) => {
+    const handleError = (message: string) => {
       setError(message);
-      setTimeout(() => setError(null), 5000);
-    });
+      // Only auto-clear errors if room is already loaded (transient errors)
+      // Fatal errors like "room not found" should persist
+      if (useRoomStore.getState().room) {
+        setTimeout(() => setError(null), 5000);
+      }
+    };
+
+    // Set up all listeners first
+    socket.on('connect', handleConnect);
+    socket.on('connect_error', handleConnectError);
+    socket.on('disconnect', handleDisconnect);
+    socket.on('room_state', handleRoomState);
+    socket.on('user_joined', handleUserJoined);
+    socket.on('user_left', handleUserLeft);
+    socket.on('vote_submitted', handleVoteSubmitted);
+    socket.on('votes_revealed', handleVotesRevealed);
+    socket.on('voting_reset', handleVotingReset);
+    socket.on('issue_changed', handleIssueChanged);
+    socket.on('issue_added', handleIssueAdded);
+    socket.on('issue_removed', handleIssueRemoved);
+    socket.on('role_updated', handleRoleUpdated);
+    socket.on('error', handleError);
+
+    // If socket is already connected, join immediately (after listeners are set up)
+    if (socket.connected) {
+      setConnected(true);
+      socketService.joinRoom(roomId);
+    }
 
     return () => {
+      // Remove all listeners to prevent stacking
+      socket.off('connect', handleConnect);
+      socket.off('connect_error', handleConnectError);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('room_state', handleRoomState);
+      socket.off('user_joined', handleUserJoined);
+      socket.off('user_left', handleUserLeft);
+      socket.off('vote_submitted', handleVoteSubmitted);
+      socket.off('votes_revealed', handleVotesRevealed);
+      socket.off('voting_reset', handleVotingReset);
+      socket.off('issue_changed', handleIssueChanged);
+      socket.off('issue_added', handleIssueAdded);
+      socket.off('issue_removed', handleIssueRemoved);
+      socket.off('role_updated', handleRoleUpdated);
+      socket.off('error', handleError);
+
       socketService.leaveRoom(roomId);
       socketService.disconnect();
       setRoom(null);
+      setError(null);
     };
   }, [roomId]);
 
