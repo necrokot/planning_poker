@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { LoginPage, DashboardPage, RoomPage } from './pages';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth';
-import { useAuthStore } from './store';
+import { DashboardPage, LoginPage, RoomPage } from './pages';
 import { api } from './services';
+import { useAuthStore } from './store';
 
 // Initialize auth state on app load
 function AuthInitializer({ children }: { children: React.ReactNode }) {

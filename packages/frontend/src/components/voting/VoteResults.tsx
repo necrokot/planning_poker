@@ -1,4 +1,4 @@
-import { VotingResults as VotingResultsType } from '@planning-poker/shared';
+import type { VotingResults as VotingResultsType } from '@planning-poker/shared';
 import { Card } from '../common';
 
 interface VoteResultsProps {
@@ -11,7 +11,7 @@ export function VoteResults({ results }: VoteResultsProps) {
   return (
     <Card className="w-full">
       <h3 className="text-lg font-semibold text-gray-700 mb-4">Results</h3>
-      
+
       <div className="flex items-center justify-center gap-8 mb-6">
         <div className="text-center">
           <p className="text-sm text-gray-500">Average</p>

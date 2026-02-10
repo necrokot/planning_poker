@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
-import jwt, { SignOptions } from 'jsonwebtoken';
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
+import jwt, { type SignOptions } from 'jsonwebtoken';
 import { config } from '../config';
 
 export interface JwtPayload {
@@ -14,7 +14,7 @@ export interface AuthenticatedRequest extends Request {
 export const authMiddleware: RequestHandler = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   const token = req.cookies?.token;
 

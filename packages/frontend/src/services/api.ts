@@ -1,4 +1,9 @@
-import { AuthResponse, CreateRoomResponse, GetRoomsResponse, RoomSummary } from '@planning-poker/shared';
+import type {
+  AuthResponse,
+  CreateRoomResponse,
+  GetRoomsResponse,
+  RoomSummary,
+} from '@planning-poker/shared';
 
 const API_BASE = '/api';
 

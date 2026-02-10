@@ -1,5 +1,5 @@
+import type { User } from '@planning-poker/shared';
 import { PrismaClient } from '@prisma/client';
-import { User } from '@planning-poker/shared';
 
 const prisma = new PrismaClient();
 

@@ -1,5 +1,5 @@
+import { FIBONACCI_VALUES, type FibonacciValue } from '@planning-poker/shared';
 import { useState } from 'react';
-import { FIBONACCI_VALUES, FibonacciValue } from '@planning-poker/shared';
 
 interface VotingCardsProps {
   onVote: (value: FibonacciValue) => void;
@@ -8,7 +8,12 @@ interface VotingCardsProps {
   hasVoted?: boolean;
 }
 
-export function VotingCards({ onVote, disabled = false, selectedValue, hasVoted }: VotingCardsProps) {
+export function VotingCards({
+  onVote,
+  disabled = false,
+  selectedValue,
+  hasVoted,
+}: VotingCardsProps) {
   const [hoveredCard, setHoveredCard] = useState<FibonacciValue | null>(null);
 
   return (
@@ -18,9 +23,10 @@ export function VotingCards({ onVote, disabled = false, selectedValue, hasVoted 
         {FIBONACCI_VALUES.map((value) => {
           const isSelected = selectedValue === value;
           const isHovered = hoveredCard === value;
-          
+
           return (
             <button
+              type="button"
               key={value}
               onClick={() => !disabled && onVote(value)}
               onMouseEnter={() => setHoveredCard(value)}
@@ -29,9 +35,10 @@ export function VotingCards({ onVote, disabled = false, selectedValue, hasVoted 
               className={`
                 w-16 h-24 rounded-lg border-2 font-bold text-xl
                 transition-all duration-200 transform
-                ${isSelected 
-                  ? 'bg-primary-600 text-white border-primary-700 scale-105 shadow-lg' 
-                  : 'bg-white text-gray-800 border-gray-300 hover:border-primary-400'
+                ${
+                  isSelected
+                    ? 'bg-primary-600 text-white border-primary-700 scale-105 shadow-lg'
+                    : 'bg-white text-gray-800 border-gray-300 hover:border-primary-400'
                 }
                 ${isHovered && !isSelected && !disabled ? 'scale-105 shadow-md' : ''}
                 ${disabled && !isSelected ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
@@ -44,9 +51,7 @@ export function VotingCards({ onVote, disabled = false, selectedValue, hasVoted 
         })}
       </div>
       {hasVoted && (
-        <p className="text-center text-gray-500 mt-4">
-          Vote submitted! Waiting for others...
-        </p>
+        <p className="text-center text-gray-500 mt-4">Vote submitted! Waiting for others...</p>
       )}
     </div>
   );

@@ -1,16 +1,16 @@
-import express from 'express';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
-import cors from 'cors';
-import helmet from 'helmet';
+import { createServer } from 'node:http';
+import type { ClientToServerEvents, ServerToClientEvents } from '@planning-poker/shared';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
+import helmet from 'helmet';
 import passport from 'passport';
+import { Server } from 'socket.io';
 import { config } from './config';
 import { connectRedis } from './config/redis';
-import { authRoutes, roomRoutes } from './routes';
 import { errorMiddleware, notFoundMiddleware } from './middleware';
+import { authRoutes, roomRoutes } from './routes';
 import { setupSocketHandlers } from './socket';
-import { ClientToServerEvents, ServerToClientEvents } from '@planning-poker/shared';
 
 async function main() {
   const app = express();
@@ -26,10 +26,12 @@ async function main() {
 
   // Middleware
   app.use(helmet());
-  app.use(cors({
-    origin: config.frontendUrl,
-    credentials: true,
-  }));
+  app.use(
+    cors({
+      origin: config.frontendUrl,
+      credentials: true,
+    }),
+  );
   app.use(express.json());
   app.use(cookieParser());
   app.use(passport.initialize());

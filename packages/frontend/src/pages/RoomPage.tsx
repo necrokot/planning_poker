@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { type FibonacciValue, Role } from '@planning-poker/shared';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { Button, Card, Spinner } from '../components/common';
+import { AdminPanel, IssueBacklog, ParticipantList, Timer } from '../components/room';
+import { VoteResults, VotingCards } from '../components/voting';
 import { useRoom } from '../hooks';
 import { useAuthStore } from '../store';
-import { Spinner, Card, Button } from '../components/common';
-import { ParticipantList, IssueBacklog, AdminPanel, Timer } from '../components/room';
-import { VotingCards, VoteResults } from '../components/voting';
-import { FibonacciValue, Role } from '@planning-poker/shared';
 
 export function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -36,13 +36,13 @@ export function RoomPage() {
   const persistedVote = user?.id ? room?.votes[user.id] : undefined;
   useEffect(() => {
     setLocalVote(persistedVote);
-  }, [persistedVote, room?.currentIssue?.id]);
+  }, [persistedVote]);
 
   // Use local vote for immediate feedback, fall back to persisted vote
   const selectedVote = localVote ?? persistedVote;
 
   const handleVote = (value: FibonacciValue) => {
-    setLocalVote(value);  // Immediate UI update
+    setLocalVote(value); // Immediate UI update
     submitVote(value);
   };
 
@@ -57,13 +57,8 @@ export function RoomPage() {
         <div className="text-center">
           {error ? (
             <>
-              <div className="bg-red-100 text-red-700 px-6 py-4 rounded-lg mb-4">
-                {error}
-              </div>
-              <Link
-                to="/dashboard"
-                className="text-primary-600 hover:text-primary-700 font-medium"
-              >
+              <div className="bg-red-100 text-red-700 px-6 py-4 rounded-lg mb-4">{error}</div>
+              <Link to="/dashboard" className="text-primary-600 hover:text-primary-700 font-medium">
                 &larr; Back to Dashboard
               </Link>
             </>
@@ -84,10 +79,7 @@ export function RoomPage() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <Link
-                to="/dashboard"
-                className="text-primary-600 hover:text-primary-700 text-sm"
-              >
+              <Link to="/dashboard" className="text-primary-600 hover:text-primary-700 text-sm">
                 &larr; Back to Dashboard
               </Link>
               <h1 className="text-2xl font-bold text-gray-800">{room.name}</h1>
@@ -119,9 +111,7 @@ export function RoomPage() {
           <div className="lg:col-span-2 space-y-6">
             {room.currentIssue ? (
               <Card>
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                  Current Issue
-                </h2>
+                <h2 className="text-xl font-semibold text-gray-800 mb-2">Current Issue</h2>
                 <p className="text-lg text-gray-700">{room.currentIssue.title}</p>
                 {room.currentIssue.description && (
                   <p className="text-gray-500 mt-1">{room.currentIssue.description}</p>
@@ -130,7 +120,10 @@ export function RoomPage() {
             ) : (
               <Card>
                 <p className="text-gray-500 text-center py-4">
-                  No issue selected. {isAdmin ? 'Select an issue from the backlog.' : 'Waiting for admin to select an issue.'}
+                  No issue selected.{' '}
+                  {isAdmin
+                    ? 'Select an issue from the backlog.'
+                    : 'Waiting for admin to select an issue.'}
                 </p>
               </Card>
             )}

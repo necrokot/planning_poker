@@ -1,13 +1,24 @@
-import { redis } from '../config/redis';
-import { config } from '../config';
-import { Room, Participant, Issue, FibonacciValue, Role } from '@planning-poker/shared';
+import {
+  type FibonacciValue,
+  type Issue,
+  type Participant,
+  Role,
+  type Room,
+} from '@planning-poker/shared';
 import { v4 as uuidv4 } from 'uuid';
+import { config } from '../config';
+import { redis } from '../config/redis';
 
 const ROOM_PREFIX = 'room:';
 const USER_ROOMS_PREFIX = 'user:rooms:';
 
 export const roomRepository = {
-  async create(userId: string, name: string, userName: string, userAvatar: string | null): Promise<Room> {
+  async create(
+    userId: string,
+    name: string,
+    userName: string,
+    userAvatar: string | null,
+  ): Promise<Room> {
     const roomId = uuidv4();
     const now = Date.now();
 
@@ -34,12 +45,7 @@ export const roomRepository = {
       createdAt: now,
     };
 
-    await redis.set(
-      `${ROOM_PREFIX}${roomId}`,
-      JSON.stringify(room),
-      'EX',
-      config.roomTtlSeconds
-    );
+    await redis.set(`${ROOM_PREFIX}${roomId}`, JSON.stringify(room), 'EX', config.roomTtlSeconds);
 
     await redis.sadd(`${USER_ROOMS_PREFIX}${userId}`, roomId);
     await redis.expire(`${USER_ROOMS_PREFIX}${userId}`, config.roomTtlSeconds);
@@ -54,12 +60,7 @@ export const roomRepository = {
   },
 
   async update(room: Room): Promise<void> {
-    await redis.set(
-      `${ROOM_PREFIX}${room.id}`,
-      JSON.stringify(room),
-      'EX',
-      config.roomTtlSeconds
-    );
+    await redis.set(`${ROOM_PREFIX}${room.id}`, JSON.stringify(room), 'EX', config.roomTtlSeconds);
   },
 
   async delete(roomId: string, adminId: string): Promise<boolean> {
@@ -83,7 +84,7 @@ export const roomRepository = {
     const room = await this.findById(roomId);
     if (!room) return null;
 
-    const existingIndex = room.participants.findIndex(p => p.userId === participant.userId);
+    const existingIndex = room.participants.findIndex((p) => p.userId === participant.userId);
     if (existingIndex >= 0) {
       room.participants[existingIndex] = {
         ...room.participants[existingIndex],
@@ -101,7 +102,7 @@ export const roomRepository = {
     const room = await this.findById(roomId);
     if (!room) return null;
 
-    const participant = room.participants.find(p => p.userId === userId);
+    const participant = room.participants.find((p) => p.userId === userId);
     if (participant) {
       participant.isConnected = false;
     }
@@ -111,7 +112,7 @@ export const roomRepository = {
     // Also remove vote from current issue
     if (room.currentIssue?.votes) {
       delete room.currentIssue.votes[userId];
-      const issueIndex = room.issues.findIndex(i => i.id === room.currentIssue!.id);
+      const issueIndex = room.issues.findIndex((i) => i.id === room.currentIssue?.id);
       if (issueIndex >= 0 && room.issues[issueIndex].votes) {
         delete room.issues[issueIndex].votes[userId];
       }
@@ -125,7 +126,7 @@ export const roomRepository = {
     const room = await this.findById(roomId);
     if (!room) return null;
 
-    const participant = room.participants.find(p => p.userId === userId);
+    const participant = room.participants.find((p) => p.userId === userId);
     if (!participant || participant.role !== Role.PLAYER) return null;
 
     room.votes[userId] = value;
@@ -137,7 +138,7 @@ export const roomRepository = {
         room.currentIssue.votes = {};
       }
       room.currentIssue.votes[userId] = value;
-      const issueIndex = room.issues.findIndex(i => i.id === room.currentIssue!.id);
+      const issueIndex = room.issues.findIndex((i) => i.id === room.currentIssue?.id);
       if (issueIndex >= 0) {
         if (!room.issues[issueIndex].votes) {
           room.issues[issueIndex].votes = {};
@@ -161,7 +162,7 @@ export const roomRepository = {
     if (room.currentIssue) {
       room.currentIssue.isRevealed = true;
       room.currentIssue.votes = { ...room.votes };
-      const issueIndex = room.issues.findIndex(i => i.id === room.currentIssue!.id);
+      const issueIndex = room.issues.findIndex((i) => i.id === room.currentIssue?.id);
       if (issueIndex >= 0) {
         room.issues[issueIndex].isRevealed = true;
         room.issues[issueIndex].votes = { ...room.votes };
@@ -179,7 +180,7 @@ export const roomRepository = {
     room.votes = {};
     room.isRevealed = false;
     room.isVotingOpen = true;
-    room.participants.forEach(p => {
+    room.participants.forEach((p) => {
       p.hasVoted = false;
     });
 
@@ -187,7 +188,7 @@ export const roomRepository = {
     if (room.currentIssue) {
       room.currentIssue.votes = {};
       room.currentIssue.isRevealed = false;
-      const issueIndex = room.issues.findIndex(i => i.id === room.currentIssue!.id);
+      const issueIndex = room.issues.findIndex((i) => i.id === room.currentIssue?.id);
       if (issueIndex >= 0) {
         room.issues[issueIndex].votes = {};
         room.issues[issueIndex].isRevealed = false;
@@ -204,7 +205,7 @@ export const roomRepository = {
 
     // Save current votes to the old issue before switching
     if (room.currentIssue) {
-      const oldIssueIndex = room.issues.findIndex(i => i.id === room.currentIssue!.id);
+      const oldIssueIndex = room.issues.findIndex((i) => i.id === room.currentIssue?.id);
       if (oldIssueIndex >= 0) {
         room.issues[oldIssueIndex].votes = { ...room.votes };
         room.issues[oldIssueIndex].isRevealed = room.isRevealed;
@@ -216,12 +217,12 @@ export const roomRepository = {
 
     // Load votes from the new issue (if it exists and has saved votes)
     if (issue) {
-      const savedIssue = room.issues.find(i => i.id === issue.id);
+      const savedIssue = room.issues.find((i) => i.id === issue.id);
       if (savedIssue?.votes) {
         room.votes = { ...savedIssue.votes };
         room.isRevealed = savedIssue.isRevealed ?? false;
         // Restore hasVoted flags based on saved votes
-        room.participants.forEach(p => {
+        room.participants.forEach((p) => {
           p.hasVoted = room.votes[p.userId] !== undefined;
         });
         room.isVotingOpen = !room.isRevealed;
@@ -230,7 +231,7 @@ export const roomRepository = {
         room.votes = {};
         room.isRevealed = false;
         room.isVotingOpen = true;
-        room.participants.forEach(p => {
+        room.participants.forEach((p) => {
           p.hasVoted = false;
         });
       }
@@ -241,7 +242,7 @@ export const roomRepository = {
       room.votes = {};
       room.isRevealed = false;
       room.isVotingOpen = true;
-      room.participants.forEach(p => {
+      room.participants.forEach((p) => {
         p.hasVoted = false;
       });
     }
@@ -269,7 +270,7 @@ export const roomRepository = {
     const room = await this.findById(roomId);
     if (!room) return null;
 
-    room.issues = room.issues.filter(i => i.id !== issueId);
+    room.issues = room.issues.filter((i) => i.id !== issueId);
     if (room.currentIssue?.id === issueId) {
       room.currentIssue = null;
     }
@@ -281,7 +282,7 @@ export const roomRepository = {
     const room = await this.findById(roomId);
     if (!room) return null;
 
-    const participant = room.participants.find(p => p.userId === userId);
+    const participant = room.participants.find((p) => p.userId === userId);
     if (!participant) return null;
 
     participant.role = role;
@@ -292,7 +293,7 @@ export const roomRepository = {
       // Also remove vote from current issue
       if (room.currentIssue?.votes) {
         delete room.currentIssue.votes[userId];
-        const issueIndex = room.issues.findIndex(i => i.id === room.currentIssue!.id);
+        const issueIndex = room.issues.findIndex((i) => i.id === room.currentIssue?.id);
         if (issueIndex >= 0 && room.issues[issueIndex].votes) {
           delete room.issues[issueIndex].votes[userId];
         }

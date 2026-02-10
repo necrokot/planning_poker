@@ -1,6 +1,6 @@
-import { userRepository } from '../repositories';
+import type { AuthUser, User } from '@planning-poker/shared';
 import { generateToken } from '../middleware';
-import { User, AuthUser } from '@planning-poker/shared';
+import { userRepository } from '../repositories';
 
 export interface GoogleProfile {
   id: string;

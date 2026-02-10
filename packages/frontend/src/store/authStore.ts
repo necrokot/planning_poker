@@ -1,5 +1,5 @@
+import type { AuthUser } from '@planning-poker/shared';
 import { create } from 'zustand';
-import { AuthUser } from '@planning-poker/shared';
 
 interface AuthState {
   user: AuthUser | null;

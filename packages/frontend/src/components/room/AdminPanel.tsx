@@ -22,7 +22,7 @@ export function AdminPanel({
   return (
     <div className="bg-white rounded-xl shadow-md p-4">
       <h3 className="text-lg font-semibold text-gray-700 mb-3">Admin Controls</h3>
-      
+
       <div className="flex flex-wrap gap-2">
         {!isVotingRevealed ? (
           <Button onClick={onReveal} disabled={!hasVotes}>

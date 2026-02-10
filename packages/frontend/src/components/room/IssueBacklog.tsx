@@ -1,6 +1,6 @@
+import type { Issue } from '@planning-poker/shared';
 import { useState } from 'react';
-import { Issue } from '@planning-poker/shared';
-import { Button, Input, Card } from '../common';
+import { Button, Card, Input } from '../common';
 
 interface IssueBacklogProps {
   issues: Issue[];
@@ -57,9 +57,10 @@ export function IssueBacklog({
           <p className="text-gray-400 text-sm">No issues added yet</p>
         ) : (
           issues.map((issue) => (
-            <div
+            <button
+              type="button"
               key={issue.id}
-              className={`p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+              className={`w-full text-left p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                 currentIssue?.id === issue.id
                   ? 'border-primary-500 bg-primary-50'
                   : 'border-gray-200 hover:border-primary-300'
@@ -92,7 +93,7 @@ export function IssueBacklog({
                   </Button>
                 )}
               </div>
-            </div>
+            </button>
           ))
         )}
       </div>

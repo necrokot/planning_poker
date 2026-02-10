@@ -1,21 +1,21 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import dotenv from 'dotenv';
-import path from 'path';
-import fs from 'fs';
 
 // Load .env from the monorepo root (two levels up from packages/backend/src)
 const findEnvPath = (): string => {
   // Try current working directory first
   let envPath = path.join(process.cwd(), '.env');
   if (fs.existsSync(envPath)) return envPath;
-  
+
   // Try monorepo root (when running from packages/backend)
   envPath = path.join(process.cwd(), '..', '..', '.env');
   if (fs.existsSync(envPath)) return envPath;
-  
+
   // Try relative to this file (dist/config or src/config -> root)
   envPath = path.join(__dirname, '..', '..', '..', '..', '.env');
   if (fs.existsSync(envPath)) return envPath;
-  
+
   // Fallback to cwd
   return path.join(process.cwd(), '.env');
 };
@@ -45,7 +45,8 @@ export const config = {
   },
 
   // Database
-  databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/planning_poker',
+  databaseUrl:
+    process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/planning_poker',
 
   // Redis
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',

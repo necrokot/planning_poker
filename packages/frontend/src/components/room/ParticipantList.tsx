@@ -1,4 +1,4 @@
-import { Participant, Role } from '@planning-poker/shared';
+import { type Participant, Role } from '@planning-poker/shared';
 import { Button } from '../common';
 
 interface ParticipantListProps {
@@ -63,7 +63,7 @@ export function ParticipantList({
                 </p>
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full ${getRoleBadgeColor(
-                    participant.role
+                    participant.role,
                   )}`}
                 >
                   {participant.role}
@@ -85,9 +85,7 @@ export function ParticipantList({
                 <div className="flex gap-1">
                   <select
                     value={participant.role}
-                    onChange={(e) =>
-                      onRoleChange?.(participant.userId, e.target.value as Role)
-                    }
+                    onChange={(e) => onRoleChange?.(participant.userId, e.target.value as Role)}
                     className="text-xs border rounded px-1 py-0.5"
                   >
                     <option value={Role.PLAYER}>Player</option>

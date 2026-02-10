@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import type { RoomSummary } from '@planning-poker/shared';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input, Card, Spinner } from '../components/common';
+import { Button, Card, Input, Spinner } from '../components/common';
 import { useAuth } from '../hooks';
 import { api } from '../services';
-import { RoomSummary } from '@planning-poker/shared';
 
 export function DashboardPage() {
   const { user, logout } = useAuth();
@@ -15,11 +15,7 @@ export function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [joinRoomId, setJoinRoomId] = useState('');
 
-  useEffect(() => {
-    loadRooms();
-  }, []);
-
-  const loadRooms = async () => {
+  const loadRooms = useCallback(async () => {
     try {
       const { rooms } = await api.rooms.getAll();
       setRooms(rooms);
@@ -28,7 +24,11 @@ export function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadRooms();
+  }, [loadRooms]);
 
   const handleCreateRoom = async () => {
     if (!newRoomName.trim()) return;
@@ -70,11 +70,7 @@ export function DashboardPage() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               {user?.avatarUrl ? (
-                <img
-                  src={user.avatarUrl}
-                  alt={user.name}
-                  className="w-8 h-8 rounded-full"
-                />
+                <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 rounded-full" />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-primary-200 flex items-center justify-center">
                   <span className="text-primary-700 font-medium">
@@ -102,16 +98,11 @@ export function DashboardPage() {
                 onChange={(e) => setNewRoomName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreateRoom()}
               />
-              <Button
-                onClick={handleCreateRoom}
-                disabled={!newRoomName.trim() || isCreating}
-              >
+              <Button onClick={handleCreateRoom} disabled={!newRoomName.trim() || isCreating}>
                 {isCreating ? 'Creating...' : 'Create Room'}
               </Button>
               {error && <p className="text-red-500 text-sm">{error}</p>}
-              <p className="text-gray-500 text-sm">
-                You can have up to 3 active rooms at a time.
-              </p>
+              <p className="text-gray-500 text-sm">You can have up to 3 active rooms at a time.</p>
             </div>
           </Card>
 
@@ -148,9 +139,7 @@ export function DashboardPage() {
                 >
                   <div>
                     <h3 className="font-medium text-gray-800">{room.name}</h3>
-                    <p className="text-sm text-gray-500">
-                      {room.participantCount} participant(s)
-                    </p>
+                    <p className="text-sm text-gray-500">{room.participantCount} participant(s)</p>
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => navigate(`/room/${room.id}`)}>
@@ -160,18 +149,12 @@ export function DashboardPage() {
                       size="sm"
                       variant="secondary"
                       onClick={() => {
-                        navigator.clipboard.writeText(
-                          `${window.location.origin}/room/${room.id}`
-                        );
+                        navigator.clipboard.writeText(`${window.location.origin}/room/${room.id}`);
                       }}
                     >
                       Copy Link
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      onClick={() => handleDeleteRoom(room.id)}
-                    >
+                    <Button size="sm" variant="danger" onClick={() => handleDeleteRoom(room.id)}>
                       Delete
                     </Button>
                   </div>

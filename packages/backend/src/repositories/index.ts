@@ -1,2 +1,2 @@
-export { userRepository, prisma } from './user.repository';
 export { roomRepository } from './room.repository';
+export { prisma, userRepository } from './user.repository';

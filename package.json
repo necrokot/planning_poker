@@ -9,11 +9,14 @@
   "scripts": {
     "dev": "concurrently \"npm run dev -w @planning-poker/backend\" \"npm run dev -w @planning-poker/frontend\"",
     "build": "npm run build -w @planning-poker/shared && npm run build -w @planning-poker/backend && npm run build -w @planning-poker/frontend",
-    "lint": "npm run lint -w @planning-poker/shared && npm run lint -w @planning-poker/backend && npm run lint -w @planning-poker/frontend",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
     "typecheck": "npm run typecheck -w @planning-poker/shared && npm run typecheck -w @planning-poker/backend && npm run typecheck -w @planning-poker/frontend",
     "test": "npm run test -w @planning-poker/backend && npm run test -w @planning-poker/frontend"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.14",
     "concurrently": "^8.2.2",
     "typescript": "^5.3.3"
   },

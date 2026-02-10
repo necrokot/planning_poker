@@ -1,2 +1,2 @@
-export { VotingCards } from './VotingCards';
 export { VoteResults } from './VoteResults';
+export { VotingCards } from './VotingCards';

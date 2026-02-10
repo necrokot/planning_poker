@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 export interface ApiError extends Error {
   statusCode?: number;
@@ -9,7 +9,7 @@ export function errorMiddleware(
   err: ApiError,
   _req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ): void {
   console.error('Error:', err);
 

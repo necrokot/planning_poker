@@ -1,7 +1,15 @@
-import { roomRepository, userRepository } from '../repositories';
-import { Room, RoomSummary, Role, Participant, FibonacciValue, Issue, VotingResults } from '@planning-poker/shared';
+import {
+  type FibonacciValue,
+  type Issue,
+  type Participant,
+  Role,
+  type Room,
+  type RoomSummary,
+  type VotingResults,
+} from '@planning-poker/shared';
 import { config } from '../config';
 import { createError } from '../middleware';
+import { roomRepository, userRepository } from '../repositories';
 
 export const roomService = {
   async createRoom(userId: string, name: string): Promise<Room> {
@@ -12,7 +20,11 @@ export const roomService = {
 
     const roomCount = await roomRepository.getUserRoomCount(userId);
     if (roomCount >= config.maxRoomsPerUser) {
-      throw createError(`Maximum ${config.maxRoomsPerUser} active rooms allowed`, 400, 'MAX_ROOMS_EXCEEDED');
+      throw createError(
+        `Maximum ${config.maxRoomsPerUser} active rooms allowed`,
+        400,
+        'MAX_ROOMS_EXCEEDED',
+      );
     }
 
     return roomRepository.create(userId, name, user.name, user.avatarUrl);
@@ -32,7 +44,7 @@ export const roomService = {
         rooms.push({
           id: room.id,
           name: room.name,
-          participantCount: room.participants.filter(p => p.isConnected).length,
+          participantCount: room.participants.filter((p) => p.isConnected).length,
           createdAt: room.createdAt,
         });
       }
@@ -63,7 +75,7 @@ export const roomService = {
       throw createError('Room not found', 404);
     }
 
-    const existingParticipant = room.participants.find(p => p.userId === userId);
+    const existingParticipant = room.participants.find((p) => p.userId === userId);
     const participant: Participant = existingParticipant || {
       userId,
       name: user.name,
@@ -91,7 +103,7 @@ export const roomService = {
       throw createError('Room not found', 404);
     }
 
-    const participant = room.participants.find(p => p.userId === userId);
+    const participant = room.participants.find((p) => p.userId === userId);
     if (!participant) {
       throw createError('Not a participant in this room', 403);
     }
@@ -158,7 +170,12 @@ export const roomService = {
     return updatedRoom;
   },
 
-  async addIssue(roomId: string, userId: string, title: string, description?: string): Promise<Issue> {
+  async addIssue(
+    roomId: string,
+    userId: string,
+    title: string,
+    description?: string,
+  ): Promise<Issue> {
     const room = await roomRepository.findById(roomId);
     if (!room) {
       throw createError('Room not found', 404);
@@ -192,7 +209,12 @@ export const roomService = {
     return updatedRoom;
   },
 
-  async updateRole(roomId: string, adminId: string, targetUserId: string, role: Role): Promise<Room> {
+  async updateRole(
+    roomId: string,
+    adminId: string,
+    targetUserId: string,
+    role: Role,
+  ): Promise<Room> {
     const room = await roomRepository.findById(roomId);
     if (!room) {
       throw createError('Room not found', 404);
@@ -250,17 +272,18 @@ export const roomService = {
       }
     }
 
-    const average = values.length > 0
-      ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10
-      : 0;
+    const average =
+      values.length > 0
+        ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10
+        : 0;
 
-    const consensus = values.length > 0 && values.every(v => v === values[0]);
+    const consensus = values.length > 0 && values.every((v) => v === values[0]);
 
     return { votes, average, consensus };
   },
 
   checkAllVoted(room: Room): boolean {
-    const players = room.participants.filter(p => p.role === Role.PLAYER && p.isConnected);
-    return players.length > 0 && players.every(p => p.hasVoted);
+    const players = room.participants.filter((p) => p.role === Role.PLAYER && p.isConnected);
+    return players.length > 0 && players.every((p) => p.hasVoted);
   },
 };

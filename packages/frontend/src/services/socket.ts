@@ -1,11 +1,11 @@
-import { io, Socket } from 'socket.io-client';
-import {
+import type {
   ClientToServerEvents,
-  ServerToClientEvents,
   FibonacciValue,
   Issue,
   Role,
+  ServerToClientEvents,
 } from '@planning-poker/shared';
+import { io, type Socket } from 'socket.io-client';
 
 type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
@@ -15,7 +15,12 @@ export const socketService = {
   connect(): TypedSocket {
     // If socket exists and is connected or connecting, return it
     if (socket && (socket.connected || socket.active)) {
-      console.log('[Socket] Reusing existing socket, connected:', socket.connected, 'active:', socket.active);
+      console.log(
+        '[Socket] Reusing existing socket, connected:',
+        socket.connected,
+        'active:',
+        socket.active,
+      );
       return socket;
     }
 

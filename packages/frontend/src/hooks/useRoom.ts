@@ -1,7 +1,14 @@
-import { useEffect, useCallback } from 'react';
-import { useRoomStore, useAuthStore } from '../store';
+import {
+  type FibonacciValue,
+  type Issue,
+  type Participant,
+  Role,
+  type Room,
+  type VotingResults,
+} from '@planning-poker/shared';
+import { useCallback, useEffect } from 'react';
 import { socketService } from '../services';
-import { FibonacciValue, Issue, Role, Room, Participant, VotingResults } from '@planning-poker/shared';
+import { useAuthStore, useRoomStore } from '../store';
 
 export function useRoom(roomId: string) {
   const {
@@ -16,7 +23,6 @@ export function useRoom(roomId: string) {
     updateParticipant,
     removeParticipant,
     setVoteSubmitted,
-    setUserVote,
     addIssue,
     removeIssue: removeIssueFromStore,
     setCurrentIssue,
@@ -27,14 +33,14 @@ export function useRoom(roomId: string) {
 
   useEffect(() => {
     console.log('[useRoom] Effect running for room:', roomId);
-    
+
     // Clear previous room state when entering a new room
     setRoom(null);
     setError(null);
     setVotingResults(null);
 
     const socket = socketService.connect();
-    
+
     // Set connected state based on actual socket state
     setConnected(socket.connected);
     console.log('[useRoom] Socket connected state:', socket.connected);
@@ -156,13 +162,26 @@ export function useRoom(roomId: string) {
       setRoom(null);
       setError(null);
     };
-  }, [roomId]);
+  }, [
+    roomId,
+    addIssue,
+    removeIssueFromStore,
+    removeParticipant,
+    resetVoting, // Set connected state based on actual socket state
+    setConnected,
+    setCurrentIssue,
+    setError, // Clear previous room state when entering a new room
+    setRoom,
+    setVoteSubmitted,
+    setVotingResults,
+    updateParticipant,
+  ]);
 
   const submitVote = useCallback(
     (value: FibonacciValue) => {
       socketService.submitVote(roomId, value);
     },
-    [roomId]
+    [roomId],
   );
 
   const revealVotes = useCallback(() => {
@@ -177,35 +196,35 @@ export function useRoom(roomId: string) {
     (issue: Issue) => {
       socketService.changeIssue(roomId, issue);
     },
-    [roomId]
+    [roomId],
   );
 
   const addNewIssue = useCallback(
     (title: string, description?: string) => {
       socketService.addIssue(roomId, title, description);
     },
-    [roomId]
+    [roomId],
   );
 
   const removeIssue = useCallback(
     (issueId: string) => {
       socketService.removeIssue(roomId, issueId);
     },
-    [roomId]
+    [roomId],
   );
 
   const updateRole = useCallback(
     (userId: string, role: Role) => {
       socketService.updateRole(roomId, userId, role);
     },
-    [roomId]
+    [roomId],
   );
 
   const startTimer = useCallback(
     (duration: number) => {
       socketService.startTimer(roomId, duration);
     },
-    [roomId]
+    [roomId],
   );
 
   const stopTimer = useCallback(() => {
@@ -216,7 +235,7 @@ export function useRoom(roomId: string) {
     (userId: string) => {
       socketService.kickParticipant(roomId, userId);
     },
-    [roomId]
+    [roomId],
   );
 
   const isAdmin = room?.adminId === user?.id;

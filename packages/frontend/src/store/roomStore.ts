@@ -1,5 +1,12 @@
+import {
+  type FibonacciValue,
+  type Issue,
+  type Participant,
+  Role,
+  type Room,
+  type VotingResults,
+} from '@planning-poker/shared';
 import { create } from 'zustand';
-import { Room, Participant, Issue, VotingResults, Role, FibonacciValue } from '@planning-poker/shared';
 
 // Calculate voting results from room state (same logic as backend)
 function calculateVotingResults(room: Room): VotingResults | null {
@@ -18,11 +25,12 @@ function calculateVotingResults(room: Room): VotingResults | null {
     }
   }
 
-  const average = values.length > 0
-    ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10
-    : 0;
+  const average =
+    values.length > 0
+      ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10
+      : 0;
 
-  const consensus = values.length > 0 && values.every(v => v === values[0]);
+  const consensus = values.length > 0 && values.every((v) => v === values[0]);
 
   return { votes, average, consensus };
 }
@@ -51,10 +59,11 @@ export const useRoomStore = create<RoomState>((set) => ({
   votingResults: null,
   isConnected: false,
   error: null,
-  setRoom: (room) => set({ 
-    room, 
-    votingResults: room ? calculateVotingResults(room) : null 
-  }),
+  setRoom: (room) =>
+    set({
+      room,
+      votingResults: room ? calculateVotingResults(room) : null,
+    }),
   setVotingResults: (votingResults) => set({ votingResults }),
   setConnected: (isConnected) => set({ isConnected }),
   setError: (error) => set({ error }),
@@ -62,7 +71,7 @@ export const useRoomStore = create<RoomState>((set) => ({
     set((state) => {
       if (!state.room) return state;
       const participants = state.room.participants.map((p) =>
-        p.userId === participant.userId ? participant : p
+        p.userId === participant.userId ? participant : p,
       );
       if (!participants.find((p) => p.userId === participant.userId)) {
         participants.push(participant);
@@ -82,7 +91,7 @@ export const useRoomStore = create<RoomState>((set) => ({
     set((state) => {
       if (!state.room) return state;
       const participants = state.room.participants.map((p) =>
-        p.userId === userId ? { ...p, hasVoted: true } : p
+        p.userId === userId ? { ...p, hasVoted: true } : p,
       );
       return { room: { ...state.room, participants } };
     }),
@@ -90,14 +99,14 @@ export const useRoomStore = create<RoomState>((set) => ({
     set((state) => {
       if (!state.room) return state;
       const participants = state.room.participants.map((p) =>
-        p.userId === userId ? { ...p, hasVoted: true } : p
+        p.userId === userId ? { ...p, hasVoted: true } : p,
       );
-      return { 
-        room: { 
-          ...state.room, 
+      return {
+        room: {
+          ...state.room,
           participants,
-          votes: { ...state.room.votes, [userId]: value }
-        } 
+          votes: { ...state.room.votes, [userId]: value },
+        },
       };
     }),
   addIssue: (issue) =>

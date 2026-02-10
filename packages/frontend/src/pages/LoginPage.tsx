@@ -4,7 +4,15 @@ import { Button, Card } from '../components/common';
 import { useAuth } from '../hooks';
 
 export function LoginPage() {
-  const { isAuthenticated, isLoading, isDevMode, loginWithGoogle, loginWithDev, loginWithDev1, loginWithDev2 } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading,
+    isDevMode,
+    loginWithGoogle,
+    loginWithDev,
+    loginWithDev1,
+    loginWithDev2,
+  } = useAuth();
 
   if (isLoading) {
     return null;
@@ -19,9 +27,7 @@ export function LoginPage() {
       <Card className="w-full max-w-md text-center">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Planning Poker</h1>
-          <p className="text-gray-600">
-            Estimate your stories collaboratively with your team
-          </p>
+          <p className="text-gray-600">Estimate your stories collaboratively with your team</p>
         </div>
 
         <div className="space-y-4">

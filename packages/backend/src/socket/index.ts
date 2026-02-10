@@ -1,12 +1,12 @@
-import { Server, Socket } from 'socket.io';
-import { verifyToken, JwtPayload } from '../middleware';
 import {
-  ClientToServerEvents,
-  ServerToClientEvents,
-  Role,
+  type ClientToServerEvents,
   FIBONACCI_VALUES,
-  FibonacciValue,
+  type FibonacciValue,
+  Role,
+  type ServerToClientEvents,
 } from '@planning-poker/shared';
+import type { Server, Socket } from 'socket.io';
+import { type JwtPayload, verifyToken } from '../middleware';
 import { roomService } from '../services';
 
 interface AuthenticatedSocket extends Socket<ClientToServerEvents, ServerToClientEvents> {
@@ -17,14 +17,14 @@ interface AuthenticatedSocket extends Socket<ClientToServerEvents, ServerToClien
 function parseCookies(cookieHeader: string | undefined): Record<string, string> {
   const cookies: Record<string, string> = {};
   if (!cookieHeader) return cookies;
-  
-  cookieHeader.split(';').forEach(cookie => {
+
+  cookieHeader.split(';').forEach((cookie) => {
     const [name, ...rest] = cookie.trim().split('=');
     if (name && rest.length > 0) {
       cookies[name] = rest.join('=');
     }
   });
-  
+
   return cookies;
 }
 
@@ -56,18 +56,20 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
     socket.on('join_room', async ({ roomId }) => {
       console.log(`User ${socket.user?.userId} attempting to join room ${roomId}`);
       try {
-        const room = await roomService.joinRoom(roomId, socket.user!.userId);
-        
+        const room = await roomService.joinRoom(roomId, socket.user?.userId);
+
         socket.join(roomId);
         socket.currentRoom = roomId;
 
-        console.log(`User ${socket.user?.userId} joined room ${roomId}, participants: ${room.participants.length}`);
+        console.log(
+          `User ${socket.user?.userId} joined room ${roomId}, participants: ${room.participants.length}`,
+        );
 
         // Send room state to the joining user
         socket.emit('room_state', room);
 
         // Notify others in the room
-        const participant = room.participants.find(p => p.userId === socket.user!.userId);
+        const participant = room.participants.find((p) => p.userId === socket.user?.userId);
         if (participant) {
           socket.to(roomId).emit('user_joined', participant);
         }
@@ -81,10 +83,10 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
     // Leave room
     socket.on('leave_room', async ({ roomId }) => {
       try {
-        await roomService.leaveRoom(roomId, socket.user!.userId);
+        await roomService.leaveRoom(roomId, socket.user?.userId);
         socket.leave(roomId);
         socket.currentRoom = undefined;
-        socket.to(roomId).emit('user_left', socket.user!.userId);
+        socket.to(roomId).emit('user_left', socket.user?.userId);
       } catch (error: unknown) {
         const err = error as { message?: string };
         socket.emit('error', err.message || 'Failed to leave room');
@@ -99,10 +101,10 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
           return;
         }
 
-        const room = await roomService.submitVote(roomId, socket.user!.userId, value);
-        
+        const room = await roomService.submitVote(roomId, socket.user?.userId, value);
+
         // Notify all users that someone voted (without revealing the value)
-        io.to(roomId).emit('vote_submitted', { userId: socket.user!.userId });
+        io.to(roomId).emit('vote_submitted', { userId: socket.user?.userId });
 
         // Check if all players have voted
         if (roomService.checkAllVoted(room)) {
@@ -118,7 +120,7 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
     // Reveal votes (admin only)
     socket.on('reveal_votes', async ({ roomId }) => {
       try {
-        const results = await roomService.revealVotes(roomId, socket.user!.userId);
+        const results = await roomService.revealVotes(roomId, socket.user?.userId);
         io.to(roomId).emit('votes_revealed', results);
       } catch (error: unknown) {
         const err = error as { message?: string };
@@ -129,9 +131,9 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
     // Reset voting (admin only)
     socket.on('reset_voting', async ({ roomId }) => {
       try {
-        await roomService.resetVoting(roomId, socket.user!.userId);
+        await roomService.resetVoting(roomId, socket.user?.userId);
         io.to(roomId).emit('voting_reset');
-        
+
         // Send updated room state
         const room = await roomService.getRoom(roomId);
         if (room) {
@@ -146,9 +148,9 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
     // Change current issue (admin only)
     socket.on('change_issue', async ({ roomId, issue }) => {
       try {
-        await roomService.changeIssue(roomId, socket.user!.userId, issue);
+        await roomService.changeIssue(roomId, socket.user?.userId, issue);
         io.to(roomId).emit('issue_changed', issue);
-        
+
         // Send updated room state
         const room = await roomService.getRoom(roomId);
         if (room) {
@@ -163,7 +165,7 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
     // Add issue to backlog (admin only)
     socket.on('add_issue', async ({ roomId, title, description }) => {
       try {
-        const issue = await roomService.addIssue(roomId, socket.user!.userId, title, description);
+        const issue = await roomService.addIssue(roomId, socket.user?.userId, title, description);
         io.to(roomId).emit('issue_added', issue);
       } catch (error: unknown) {
         const err = error as { message?: string };
@@ -174,7 +176,7 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
     // Remove issue from backlog (admin only)
     socket.on('remove_issue', async ({ roomId, issueId }) => {
       try {
-        await roomService.removeIssue(roomId, socket.user!.userId, issueId);
+        await roomService.removeIssue(roomId, socket.user?.userId, issueId);
         io.to(roomId).emit('issue_removed', issueId);
       } catch (error: unknown) {
         const err = error as { message?: string };
@@ -190,9 +192,9 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
           return;
         }
 
-        await roomService.updateRole(roomId, socket.user!.userId, userId, role);
+        await roomService.updateRole(roomId, socket.user?.userId, userId, role);
         io.to(roomId).emit('role_updated', { userId, role });
-        
+
         // Send updated room state
         const room = await roomService.getRoom(roomId);
         if (room) {
@@ -207,7 +209,7 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
     // Start timer (admin only)
     socket.on('start_timer', async ({ roomId, duration }) => {
       try {
-        const endTime = await roomService.startTimer(roomId, socket.user!.userId, duration);
+        const endTime = await roomService.startTimer(roomId, socket.user?.userId, duration);
         io.to(roomId).emit('timer_started', endTime);
       } catch (error: unknown) {
         const err = error as { message?: string };
@@ -218,7 +220,7 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
     // Stop timer (admin only)
     socket.on('stop_timer', async ({ roomId }) => {
       try {
-        await roomService.stopTimer(roomId, socket.user!.userId);
+        await roomService.stopTimer(roomId, socket.user?.userId);
         io.to(roomId).emit('timer_stopped');
       } catch (error: unknown) {
         const err = error as { message?: string };
@@ -230,14 +232,14 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
     socket.on('kick_participant', async ({ roomId, userId }) => {
       try {
         const room = await roomService.getRoom(roomId);
-        if (!room || room.adminId !== socket.user!.userId) {
+        if (!room || room.adminId !== socket.user?.userId) {
           socket.emit('error', 'Only admin can kick participants');
           return;
         }
 
         await roomService.leaveRoom(roomId, userId);
         io.to(roomId).emit('participant_kicked', userId);
-        
+
         // Send updated room state
         const updatedRoom = await roomService.getRoom(roomId);
         if (updatedRoom) {
@@ -252,7 +254,7 @@ export function setupSocketHandlers(io: Server<ClientToServerEvents, ServerToCli
     // Handle disconnection
     socket.on('disconnect', async () => {
       console.log(`User disconnected: ${socket.user?.userId}`);
-      
+
       if (socket.currentRoom && socket.user) {
         try {
           await roomService.leaveRoom(socket.currentRoom, socket.user.userId);
