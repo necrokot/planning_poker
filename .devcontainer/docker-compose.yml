@@ -1,0 +1,79 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace:cached
+      - node_modules:/workspace/node_modules
+      - node_modules_backend:/workspace/packages/backend/node_modules
+      - node_modules_frontend:/workspace/packages/frontend/node_modules
+      - node_modules_shared:/workspace/packages/shared/node_modules
+    command: sleep infinity
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - FRONTEND_URL=http://localhost:3000
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GOOGLE_REDIRECT_URI=http://localhost:3001/api/auth/callback
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-in-production}
+      - JWT_EXPIRY=7d
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/planning_poker
+      - REDIS_URL=redis://redis:6379
+      - MAX_ROOMS_PER_USER=3
+      - ROOM_TTL_SECONDS=86400
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - devcontainer-net
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=planning_poker
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - devcontainer-net
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - devcontainer-net
+
+  adminer:
+    image: adminer
+    depends_on:
+      - postgres
+    networks:
+      - devcontainer-net
+
+volumes:
+  node_modules:
+  node_modules_backend:
+  node_modules_frontend:
+  node_modules_shared:
+  postgres_data:
+  redis_data:
+
+networks:
+  devcontainer-net:
+    driver: bridge
