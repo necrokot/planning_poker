@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useRoom } from '../hooks';
 import { useAuthStore } from '../store';
@@ -10,7 +10,7 @@ import { FibonacciValue, Role } from '@planning-poker/shared';
 export function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const { user } = useAuthStore();
-  const [selectedVote, setSelectedVote] = useState<FibonacciValue | undefined>();
+  const [localVote, setLocalVote] = useState<FibonacciValue | undefined>();
 
   const {
     room,
@@ -32,13 +32,22 @@ export function RoomPage() {
     kickParticipant,
   } = useRoom(roomId!);
 
+  // Sync local vote with persisted vote when issue changes or room state updates
+  const persistedVote = user?.id ? room?.votes[user.id] : undefined;
+  useEffect(() => {
+    setLocalVote(persistedVote);
+  }, [persistedVote, room?.currentIssue?.id]);
+
+  // Use local vote for immediate feedback, fall back to persisted vote
+  const selectedVote = localVote ?? persistedVote;
+
   const handleVote = (value: FibonacciValue) => {
-    setSelectedVote(value);
+    setLocalVote(value);  // Immediate UI update
     submitVote(value);
   };
 
   const handleReset = () => {
-    setSelectedVote(undefined);
+    setLocalVote(undefined);
     resetVotes();
   };
 

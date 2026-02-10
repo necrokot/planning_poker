@@ -16,6 +16,7 @@ export function useRoom(roomId: string) {
     updateParticipant,
     removeParticipant,
     setVoteSubmitted,
+    setUserVote,
     addIssue,
     removeIssue: removeIssueFromStore,
     setCurrentIssue,

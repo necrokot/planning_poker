@@ -49,6 +49,8 @@ export interface Issue {
   title: string;
   description?: string;
   finalEstimate?: FibonacciValue;
+  votes?: Record<string, FibonacciValue>;  // Per-issue votes
+  isRevealed?: boolean;  // Per-issue reveal state
 }
 
 // Room state
