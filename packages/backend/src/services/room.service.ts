@@ -27,7 +27,7 @@ export const roomService = {
       );
     }
 
-    return roomRepository.create(userId, name, user.name, user.avatarUrl);
+    return roomRepository.create(userId, name, user.name, user.avatarUrl, user.color);
   },
 
   async getRoom(roomId: string): Promise<Room | null> {
@@ -79,6 +79,7 @@ export const roomService = {
     const participant: Participant = existingParticipant || {
       userId,
       name: user.name,
+      color: user.color,
       avatarUrl: user.avatarUrl,
       role: userId === room.adminId ? Role.ADMIN : Role.SPECTATOR,
       hasVoted: false,

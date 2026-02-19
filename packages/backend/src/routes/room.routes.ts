@@ -14,7 +14,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const { name } = createRoomSchema.parse(req.body);
-    const room = await roomService.createRoom(authReq.user?.userId, name);
+    const room = await roomService.createRoom(authReq.user!.userId, name);
     res.status(201).json({
       room: { id: room.id, name: room.name, participantCount: 1, createdAt: room.createdAt },
     });
@@ -32,7 +32,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
 router.get('/', authMiddleware, async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
-    const rooms = await roomService.getUserRooms(authReq.user?.userId);
+    const rooms = await roomService.getUserRooms(authReq.user!.userId);
     res.json({ rooms });
   } catch {
     res.status(500).json({ message: 'Failed to get rooms' });
@@ -57,7 +57,7 @@ router.get('/:roomId', authMiddleware, async (req: Request, res: Response) => {
 router.delete('/:roomId', authMiddleware, async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
-    await roomService.deleteRoom(req.params.roomId, authReq.user?.userId);
+    await roomService.deleteRoom(req.params.roomId, authReq.user!.userId);
     res.json({ message: 'Room deleted' });
   } catch (error: unknown) {
     const err = error as { statusCode?: number; message?: string };

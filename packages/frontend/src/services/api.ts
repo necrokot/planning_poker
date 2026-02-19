@@ -69,6 +69,16 @@ export const api = {
       });
       return handleResponse<AuthResponse>(response);
     },
+
+    async simpleLogin(name: string, color: string): Promise<AuthResponse> {
+      const response = await fetch(`${API_BASE}/auth/simple-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ name, color }),
+      });
+      return handleResponse<AuthResponse>(response);
+    },
   },
 
   rooms: {

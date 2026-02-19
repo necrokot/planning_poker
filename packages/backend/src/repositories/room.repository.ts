@@ -18,6 +18,7 @@ export const roomRepository = {
     name: string,
     userName: string,
     userAvatar: string | null,
+    userColor: string | null = null,
   ): Promise<Room> {
     const roomId = uuidv4();
     const now = Date.now();
@@ -25,6 +26,7 @@ export const roomRepository = {
     const adminParticipant: Participant = {
       userId,
       name: userName,
+      color: userColor,
       avatarUrl: userAvatar,
       role: Role.ADMIN,
       hasVoted: false,

@@ -1,9 +1,10 @@
 // User types
 export interface User {
   id: string;
-  googleId: string;
-  email: string;
+  googleId: string | null;
+  email: string | null;
   name: string;
+  color: string | null;
   avatarUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -12,6 +13,7 @@ export interface User {
 export interface UserPublic {
   id: string;
   name: string;
+  color: string | null;
   avatarUrl: string | null;
 }
 
@@ -26,6 +28,7 @@ export enum Role {
 export interface Participant {
   userId: string;
   name: string;
+  color: string | null;
   avatarUrl: string | null;
   role: Role;
   hasVoted: boolean;
@@ -143,11 +146,17 @@ export interface ApiError {
 // Auth types
 export interface AuthUser {
   id: string;
-  email: string;
+  email: string | null;
   name: string;
+  color: string | null;
   avatarUrl: string | null;
 }
 
 export interface AuthResponse {
   user: AuthUser;
+}
+
+export interface SimpleLoginRequest {
+  name: string;
+  color: string; // hex, e.g. "#3B82F6"
 }

@@ -76,9 +76,7 @@ export function IssueBacklog({
                   <p className="font-medium text-gray-800">{issue.title}</p>
                   {issue.description && (
                     <div className="text-sm text-gray-500 prose prose-sm max-w-none prose-p:my-0.5 prose-headings:my-1 prose-ul:my-0.5 prose-ol:my-0.5 line-clamp-3">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {issue.description}
-                      </ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{issue.description}</ReactMarkdown>
                     </div>
                   )}
                   {issue.finalEstimate !== undefined && (

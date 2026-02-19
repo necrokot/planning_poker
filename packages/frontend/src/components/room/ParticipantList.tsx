@@ -1,5 +1,5 @@
 import { type Participant, Role } from '@planning-poker/shared';
-import { Button } from '../common';
+import { Avatar, Button } from '../common';
 
 interface ParticipantListProps {
   participants: Participant[];
@@ -41,19 +41,11 @@ export function ParticipantList({
             className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50"
           >
             <div className="flex items-center gap-3">
-              {participant.avatarUrl ? (
-                <img
-                  src={participant.avatarUrl}
-                  alt={participant.name}
-                  className="w-8 h-8 rounded-full"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-primary-200 flex items-center justify-center">
-                  <span className="text-primary-700 font-medium text-sm">
-                    {participant.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+              <Avatar
+                name={participant.name}
+                avatarUrl={participant.avatarUrl}
+                color={participant.color}
+              />
               <div>
                 <p className="font-medium text-gray-800 text-sm">
                   {participant.name}

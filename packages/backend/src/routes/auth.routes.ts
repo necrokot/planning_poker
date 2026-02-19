@@ -75,7 +75,7 @@ router.get(
 router.get('/me', authMiddleware, async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
-    const user = await authService.getCurrentUser(authReq.user?.userId);
+    const user = await authService.getCurrentUser(authReq.user!.userId);
     if (!user) {
       res.status(404).json({ message: 'User not found' });
       return;
@@ -90,6 +90,37 @@ router.get('/me', authMiddleware, async (req: Request, res: Response) => {
 router.post('/logout', (_req, res) => {
   res.clearCookie('token');
   res.json({ message: 'Logged out successfully' });
+});
+
+// Simple login (available in all environments)
+router.post('/simple-login', async (req, res) => {
+  const { name, color } = req.body as { name?: string; color?: string };
+
+  if (!name || typeof name !== 'string' || name.trim().length === 0 || name.trim().length > 50) {
+    res.status(400).json({ message: 'Name must be between 1 and 50 characters' });
+    return;
+  }
+
+  if (!color || typeof color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(color)) {
+    res.status(400).json({ message: 'Color must be a valid hex color (e.g. #3B82F6)' });
+    return;
+  }
+
+  try {
+    const { user, token } = await authService.handleSimpleLogin(name.trim(), color);
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: config.nodeEnv === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.json({ user });
+  } catch (error) {
+    console.error('Simple login error:', error);
+    res.status(500).json({ message: 'Login failed' });
+  }
 });
 
 // Dev auth status (for frontend to know if dev login is available)

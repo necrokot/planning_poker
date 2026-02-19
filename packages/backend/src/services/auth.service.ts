@@ -25,7 +25,7 @@ export const authService = {
 
     const token = generateToken({
       userId: user.id,
-      email: user.email,
+      email: user.email ?? undefined,
     });
 
     return { user, token };
@@ -39,8 +39,19 @@ export const authService = {
       id: user.id,
       email: user.email,
       name: user.name,
+      color: user.color,
       avatarUrl: user.avatarUrl,
     };
+  },
+
+  async handleSimpleLogin(name: string, color: string): Promise<{ user: User; token: string }> {
+    const user = await userRepository.createSimpleUser(name, color);
+
+    const token = generateToken({
+      userId: user.id,
+    });
+
+    return { user, token };
   },
 
   async handleDevLogin(): Promise<{ user: User; token: string }> {
@@ -53,7 +64,7 @@ export const authService = {
 
     const token = generateToken({
       userId: user.id,
-      email: user.email,
+      email: user.email ?? undefined,
     });
 
     return { user, token };
@@ -69,7 +80,7 @@ export const authService = {
 
     const token = generateToken({
       userId: user.id,
-      email: user.email,
+      email: user.email ?? undefined,
     });
 
     return { user, token };
@@ -85,7 +96,7 @@ export const authService = {
 
     const token = generateToken({
       userId: user.id,
-      email: user.email,
+      email: user.email ?? undefined,
     });
 
     return { user, token };

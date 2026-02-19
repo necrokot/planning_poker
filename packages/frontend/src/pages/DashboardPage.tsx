@@ -1,7 +1,7 @@
 import type { RoomSummary } from '@planning-poker/shared';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, Input, Spinner } from '../components/common';
+import { Avatar, Button, Card, Input, Spinner } from '../components/common';
 import { useAuth } from '../hooks';
 import { api } from '../services';
 
@@ -69,15 +69,7 @@ export function DashboardPage() {
           <h1 className="text-2xl font-bold text-gray-800">Planning Poker</h1>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              {user?.avatarUrl ? (
-                <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 rounded-full" />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-primary-200 flex items-center justify-center">
-                  <span className="text-primary-700 font-medium">
-                    {user?.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+              {user && <Avatar name={user.name} avatarUrl={user.avatarUrl} color={user.color} />}
               <span className="text-gray-700">{user?.name}</span>
             </div>
             <Button variant="secondary" size="sm" onClick={logout}>

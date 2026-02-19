@@ -72,6 +72,18 @@ export function useAuth() {
     }
   };
 
+  const loginSimple = async (name: string, color: string) => {
+    try {
+      setLoading(true);
+      const { user } = await api.auth.simpleLogin(name, color);
+      setUser(user);
+    } catch (error) {
+      console.error('Simple login failed:', error);
+      setLoading(false);
+      throw error;
+    }
+  };
+
   return {
     user,
     isLoading,
@@ -82,6 +94,7 @@ export function useAuth() {
     loginWithDev,
     loginWithDev1,
     loginWithDev2,
+    loginSimple,
     setLoading,
   };
 }

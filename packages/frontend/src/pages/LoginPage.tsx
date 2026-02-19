@@ -1,7 +1,21 @@
+import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { GoogleLoginButton } from '../components/auth';
-import { Button, Card } from '../components/common';
+import { Button, Card, Input } from '../components/common';
 import { useAuth } from '../hooks';
+
+const COLORS = [
+  '#EF4444',
+  '#F97316',
+  '#EAB308',
+  '#22C55E',
+  '#14B8A6',
+  '#3B82F6',
+  '#6366F1',
+  '#A855F7',
+  '#EC4899',
+  '#78716C',
+];
 
 export function LoginPage() {
   const {
@@ -12,7 +26,13 @@ export function LoginPage() {
     loginWithDev,
     loginWithDev1,
     loginWithDev2,
+    loginSimple,
   } = useAuth();
+
+  const [simpleName, setSimpleName] = useState('');
+  const [selectedColor, setSelectedColor] = useState(COLORS[0]);
+  const [isJoining, setIsJoining] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
 
   if (isLoading) {
     return null;
@@ -21,6 +41,18 @@ export function LoginPage() {
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
+
+  const handleSimpleLogin = async () => {
+    if (!simpleName.trim()) return;
+    setIsJoining(true);
+    setJoinError(null);
+    try {
+      await loginSimple(simpleName.trim(), selectedColor);
+    } catch {
+      setJoinError('Login failed. Please try again.');
+      setIsJoining(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center p-4">
@@ -33,13 +65,59 @@ export function LoginPage() {
         <div className="space-y-4">
           <GoogleLoginButton onClick={loginWithGoogle} />
 
+          <div className="relative flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative bg-white px-4 text-sm text-gray-500">or</div>
+          </div>
+
+          <div className="space-y-3 text-left">
+            <Input
+              placeholder="Your name"
+              value={simpleName}
+              onChange={(e) => setSimpleName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSimpleLogin()}
+            />
+
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Pick a color</p>
+              <div className="flex gap-2 flex-wrap">
+                {COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setSelectedColor(color)}
+                    className={`w-7 h-7 rounded-full transition-all ${
+                      selectedColor === color
+                        ? 'ring-2 ring-offset-2 ring-gray-500 scale-110'
+                        : 'hover:scale-105'
+                    }`}
+                    style={{ backgroundColor: color }}
+                    aria-label={color}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <Button
+              onClick={handleSimpleLogin}
+              disabled={!simpleName.trim() || isJoining}
+              className="w-full"
+            >
+              {isJoining ? 'Joining...' : 'Quick Join'}
+            </Button>
+
+            {joinError && <p className="text-red-500 text-sm">{joinError}</p>}
+          </div>
+
           {isDevMode && (
             <>
               <div className="relative flex items-center justify-center">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300" />
                 </div>
-                <div className="relative bg-white px-4 text-sm text-gray-500">or</div>
+                <div className="relative bg-white px-4 text-sm text-gray-500">dev</div>
               </div>
 
               <Button

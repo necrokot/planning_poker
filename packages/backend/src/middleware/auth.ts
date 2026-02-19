@@ -4,7 +4,7 @@ import { config } from '../config';
 
 export interface JwtPayload {
   userId: string;
-  email: string;
+  email?: string;
 }
 
 export interface AuthenticatedRequest extends Request {
