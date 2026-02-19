@@ -41,6 +41,9 @@ services:
     restart: always
     ports:
       - "80:80"
+    environment:
+      - BASIC_AUTH_USER=${BASIC_AUTH_USER}
+      - BASIC_AUTH_PASS=${BASIC_AUTH_PASS}
     depends_on:
       - backend
     networks:

@@ -82,13 +82,21 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: BASIC_AUTH_USER,BASIC_AUTH_PASS
           script: |
             cd /opt/planning-poker
+            sed -i '/^BASIC_AUTH/d' .env 2>/dev/null || true
+            echo "BASIC_AUTH_USER=$BASIC_AUTH_USER" >> .env
+            echo "BASIC_AUTH_PASS=$BASIC_AUTH_PASS" >> .env
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
             docker image prune -f
+        env:
+          BASIC_AUTH_USER: ${{ secrets.BASIC_AUTH_USER }}
+          BASIC_AUTH_PASS: ${{ secrets.BASIC_AUTH_PASS }}
 
       - name: Health check
         run: |
           sleep 30
-          curl -f ${{ secrets.DEPLOY_URL }}/health || exit 1
+          curl -f -u "${{ secrets.BASIC_AUTH_USER }}:${{ secrets.BASIC_AUTH_PASS }}" \
+            ${{ secrets.DEPLOY_URL }}/health || exit 1
