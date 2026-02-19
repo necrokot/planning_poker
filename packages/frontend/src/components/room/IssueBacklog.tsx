@@ -1,5 +1,7 @@
 import type { Issue } from '@planning-poker/shared';
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Button, Card, Input } from '../common';
 
 interface IssueBacklogProps {
@@ -41,10 +43,12 @@ export function IssueBacklog({
             value={newIssueTitle}
             onChange={(e) => setNewIssueTitle(e.target.value)}
           />
-          <Input
-            placeholder="Description (optional)"
+          <textarea
+            placeholder="Description (optional, markdown supported)"
             value={newIssueDesc}
             onChange={(e) => setNewIssueDesc(e.target.value)}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-y"
           />
           <Button onClick={handleAddIssue} disabled={!newIssueTitle.trim()} size="sm">
             Add Issue
@@ -71,7 +75,11 @@ export function IssueBacklog({
                 <div>
                   <p className="font-medium text-gray-800">{issue.title}</p>
                   {issue.description && (
-                    <p className="text-sm text-gray-500">{issue.description}</p>
+                    <div className="text-sm text-gray-500 prose prose-sm max-w-none prose-p:my-0.5 prose-headings:my-1 prose-ul:my-0.5 prose-ol:my-0.5 line-clamp-3">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {issue.description}
+                      </ReactMarkdown>
+                    </div>
                   )}
                   {issue.finalEstimate !== undefined && (
                     <span className="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">

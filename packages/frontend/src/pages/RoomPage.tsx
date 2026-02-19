@@ -1,5 +1,7 @@
 import { type FibonacciValue, Role } from '@planning-poker/shared';
 import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Card, Spinner } from '../components/common';
 import { AdminPanel, IssueBacklog, ParticipantList, Timer } from '../components/room';
@@ -114,7 +116,11 @@ export function RoomPage() {
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">Current Issue</h2>
                 <p className="text-lg text-gray-700">{room.currentIssue.title}</p>
                 {room.currentIssue.description && (
-                  <p className="text-gray-500 mt-1">{room.currentIssue.description}</p>
+                  <div className="text-gray-500 mt-2 prose prose-sm max-w-none">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {room.currentIssue.description}
+                    </ReactMarkdown>
+                  </div>
                 )}
               </Card>
             ) : (
