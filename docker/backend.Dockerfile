@@ -52,9 +52,9 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/packages/backend/dist ./packages/backend/dist
 COPY --from=builder /app/packages/backend/prisma ./packages/backend/prisma
-COPY --from=builder /app/packages/backend/node_modules/.prisma ./packages/backend/node_modules/.prisma
 
 WORKDIR /app/packages/backend
+RUN npx prisma generate
 
 EXPOSE 3001
 
