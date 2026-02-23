@@ -31,6 +31,7 @@ jobs:
           BASIC_AUTH_USER: ${{ secrets.BASIC_AUTH_USER }}
           BASIC_AUTH_PASS: ${{ secrets.BASIC_AUTH_PASS }}
         run: |
+          echo "DOCKER_HOST: $DOCKER_HOST"
           docker compose -f docker-compose.prod.yml up --build -d
           docker image prune -f
 
