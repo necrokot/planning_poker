@@ -16,7 +16,10 @@ services:
       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRY=7d
-      - DATABASE_URL=${DATABASE_URL}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=planning_poker
       - REDIS_URL=redis://redis:6379
       - MAX_ROOMS_PER_USER=3
       - ROOM_TTL_SECONDS=86400

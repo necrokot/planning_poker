@@ -22,7 +22,10 @@ services:
       - GOOGLE_REDIRECT_URI=http://localhost:3001/api/auth/callback
       - JWT_SECRET=${JWT_SECRET:-dev-secret-change-in-production}
       - JWT_EXPIRY=7d
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/planning_poker
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=planning_poker
       - REDIS_URL=redis://redis:6379
       - MAX_ROOMS_PER_USER=3
       - ROOM_TTL_SECONDS=86400

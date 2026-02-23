@@ -45,8 +45,13 @@ export const config = {
   },
 
   // Database
-  databaseUrl:
-    process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/planning_poker',
+  databaseUrl: (() => {
+    const url =
+      process.env.DATABASE_URL ||
+      `postgresql://${process.env.POSTGRES_USER || 'postgres'}:${process.env.POSTGRES_PASSWORD || 'postgres'}@${process.env.POSTGRES_HOST || 'localhost'}:${process.env.POSTGRES_PORT || '5432'}/${process.env.POSTGRES_DB || 'planning_poker'}`;
+    process.env.DATABASE_URL = url;
+    return url;
+  })(),
 
   // Redis
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
