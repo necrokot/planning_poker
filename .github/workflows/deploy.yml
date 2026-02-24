@@ -17,6 +17,7 @@ jobs:
 
       - name: Add remote to known hosts
         run: |
+          ping -c 1 ${{ vars.DEPLOY_HOST }}
           echo "DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}"
           ssh-keyscan -H ${{ vars.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
