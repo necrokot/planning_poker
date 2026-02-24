@@ -16,7 +16,12 @@ jobs:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
       - name: Add remote to known hosts
-        run: ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+        run: |
+          echo "DEPLOY_HOST: $DEPLOY_HOST"
+          echo ${{ env }}
+          echo ${{ vars }}
+          echo ${{ secrets }}
+          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
 
       - name: Deploy via DOCKER_HOST
         env:
