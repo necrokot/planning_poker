@@ -16,11 +16,11 @@ jobs:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
       - name: Add remote to known hosts
-        run: ssh-keyscan -H ${{ vars.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+        run: ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
 
       - name: Deploy via DOCKER_HOST
         env:
-          DOCKER_HOST: ssh://${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}
+          DOCKER_HOST: ssh://$DEPLOY_USER@$DEPLOY_HOST
           FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
