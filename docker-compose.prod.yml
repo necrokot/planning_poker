@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   backend:
+    image: ${BACKEND_IMAGE:-planning-poker-backend:latest}
     build:
       context: .
       dockerfile: docker/backend.Dockerfile
@@ -37,6 +38,7 @@ services:
       - planning-poker-net
 
   frontend:
+    image: ${FRONTEND_IMAGE:-planning-poker-frontend:latest}
     build:
       context: .
       dockerfile: docker/frontend.Dockerfile
