@@ -17,12 +17,12 @@ jobs:
 
       - name: Add remote to known hosts
         run: |
-          echo "DEPLOY_HOST: ${{ env.DEPLOY_HOST }}"
-          ssh-keyscan -H ${{ env.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          echo "DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}"
+          ssh-keyscan -H ${{ vars.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy via DOCKER_HOST
         env:
-          DOCKER_HOST: ssh://${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}
+          DOCKER_HOST: ssh://${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}
           FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
