@@ -74,7 +74,7 @@ deploy:
   before_script:
     - apk add --no-cache openssh-client curl
     - eval $(ssh-agent -s)
-    - echo "$DEPLOY_SSH_KEY" | printf '%s' "$ENC" | tr '|' '\n' | base64 -d | tr -d '\r' | ssh-add -
+    - printf '%s' "$DEPLOY_SSH_KEY" | tr '|' '\n' | base64 -d | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
   script:
